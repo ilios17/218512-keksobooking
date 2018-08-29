@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Юлия Ерцева](https://up.htmlacademy.ru/javascript/15/user/218512).
-* Наставник: `Неизвестно`.
+* Наставник: `Борис Мудрук`.
 
 ---
 
