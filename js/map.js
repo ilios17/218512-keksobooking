@@ -18,7 +18,14 @@ var MIN_ROOMS = 1;
 var MAX_ROOMS = 5;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
+var MAIN_PIN_WIDTH = 62;
+var MAIN_PIN_HEIGHT = 84;
+var pinPositionLeft = 570;
+var pinPositionTop = 375;
 var pinGap = PIN_WIDTH / 2;
+var addressStartX = MAIN_PIN_WIDTH / 2 + pinPositionLeft;
+var addressStartY = MAIN_PIN_WIDTH / 2 + pinPositionTop;
+var addressActiveY = MAIN_PIN_HEIGHT+ pinPositionTop;
 var offerArray = [];
 var avatarUrlArray = [];
 var avatarArray = [];
@@ -134,7 +141,6 @@ var createPin = function (adInfo) {
   return singlePin;
 };
 
-
 var drawPins = function () {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < AD_AMOUNT; i++) {
@@ -142,7 +148,7 @@ var drawPins = function () {
   }
   pinsList.appendChild(fragment);
 };
-/* Lint ругался на меня, если return был не в конце функции. и На просто свитч тоже ругался. */
+
 var typeTranslator = function (type) {
   var translatedType = '';
   switch (type) {
@@ -179,7 +185,7 @@ var showAd = function (ad) {
 
 var hideSameElements = function (array) {
   for (var i = 1; i < array.length; i++) {
-    array.style.display = 'none';
+    array[i].style.display = 'none';
   }
 };
 
@@ -212,9 +218,9 @@ var createImages = function (adsElement) {
   var fragment = document.createDocumentFragment();
   for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
     fragment.appendChild(photoElement);
-    document.querySelector('.popup__photos').appendChild(fragment);
     document.querySelector('.popup__photo').src = adsElement.offer.photos[i];
   }
+  document.querySelector('.popup__photos').appendChild(fragment);
 };
 
 var drawBigAd = function (adsElement) {
@@ -224,6 +230,7 @@ var drawBigAd = function (adsElement) {
   modifyFeaturesList(adsElement.offer.features);
   createImages(adsElement);
 };
+
 
 shuffleArray(AD_TITLE_ARRAY);
 createRandomPng(AVATAR_SRC);
@@ -236,6 +243,7 @@ createAdArray();
 
 var mainPin = document.querySelector('.map__pin--main');
 var pinsContainer = document.querySelector('.map__pins');
+document.querySelector('#address').value = addressStartX + ',' + addressStartY;
 
 var removeDisables = function () {
   var fieldsets = document.querySelectorAll('fieldset');
@@ -254,6 +262,8 @@ var removeSelectDisables = function () {
 var openMapAndForms = function () {
   document.querySelector('.map').classList.remove('map--faded');
   document.querySelector('.ad-form').classList.remove('ad-form--disabled');
+  document.querySelector('#address').value = addressStartX + ',' + addressActiveY;
+
 };
 
 mainPin.addEventListener('mouseup', function () {
