@@ -18,6 +18,13 @@ var MIN_ROOMS = 1;
 var MAX_ROOMS = 5;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
+var MAIN_PIN_WIDTH = 62;
+var MAIN_PIN_HEIGHT = 84;
+var MAIN_PIN_TOP = 375;
+var MAIN_PIN_LEFT = 570;
+var startAddressX = MAIN_PIN_WIDTH / 2 + MAIN_PIN_LEFT;
+var startAddressY = MAIN_PIN_WIDTH / 2 + MAIN_PIN_TOP;
+var activeAddressY = MAIN_PIN_HEIGHT + MAIN_PIN_TOP;
 var pinGap = PIN_WIDTH / 2;
 var offerArray = [];
 var avatarUrlArray = [];
@@ -142,7 +149,7 @@ var drawPins = function () {
   }
   pinsList.appendChild(fragment);
 };
-/* Lint ругался на меня, если return был не в конце функции. и На просто свитч тоже ругался. */
+
 var typeTranslator = function (type) {
   var translatedType = '';
   switch (type) {
@@ -177,52 +184,44 @@ var showAd = function (ad) {
   return adCard;
 };
 
-var hideSameElements = function (array) {
-  for (var i = 1; i < array.length; i++) {
-    array.style.display = 'none';
-  }
-};
-
-
 var modifyFeaturesList = function (features) {
+  var featuresUl = document.querySelector('.popup__features');
+  var clone = featuresUl.cloneNode(true);
+  featuresUl.innerHTML = '';
   for (var i = 0; i < features.length; i++) {
     if (features[i] === 'wifi') {
-      document.querySelector('.popup__feature--wifi').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--wifi'));
     }
     if (features[i] === 'dishwasher') {
-      document.querySelector('.popup__feature--dishwasher').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--dishwasher'));
     }
     if (features[i] === 'parking') {
-      document.querySelector('.popup__feature--parking').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--parking'));
     }
     if (features[i] === 'washer') {
-      document.querySelector('.popup__feature--washer').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--washer'));
     }
     if (features[i] === 'elevator') {
-      document.querySelector('.popup__feature--elevator').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--elevator'));
     }
     if (features[i] === 'conditioner') {
-      document.querySelector('.popup__feature--conditioner').style.display = 'inline-block';
+      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--conditioner'));
     }
   }
 };
 
 var createImages = function (adsElement) {
-  var photoElement = document.querySelector('.popup__photo').cloneNode(true);
   var fragment = document.createDocumentFragment();
   for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
+    var photoElement = document.querySelector('.popup__photo').cloneNode(true);
+    photoElement.src = adsElement.offer.photos[i];
     fragment.appendChild(photoElement);
-    document.querySelector('.popup__photos').appendChild(fragment);
-    document.querySelector('.popup__photo').src = adsElement.offer.photos[i];
   }
+  document.querySelector('.popup__photos').appendChild(fragment);
 };
 
 var drawBigAd = function (adsElement) {
   document.querySelector('.map__filters-container').insertAdjacentElement('beforeBegin', showAd(adsElement));
-  var featuresListItems = document.querySelectorAll('.popup__feature');
-  hideSameElements(featuresListItems);
-  modifyFeaturesList(adsElement.offer.features);
-  createImages(adsElement);
 };
 
 shuffleArray(AD_TITLE_ARRAY);
@@ -236,6 +235,9 @@ createAdArray();
 
 var mainPin = document.querySelector('.map__pin--main');
 var pinsContainer = document.querySelector('.map__pins');
+var addressField = document.querySelector('#address');
+
+addressField.value = startAddressX + ',' + startAddressY;
 
 var removeDisables = function () {
   var fieldsets = document.querySelectorAll('fieldset');
@@ -254,6 +256,7 @@ var removeSelectDisables = function () {
 var openMapAndForms = function () {
   document.querySelector('.map').classList.remove('map--faded');
   document.querySelector('.ad-form').classList.remove('ad-form--disabled');
+  addressField.value = startAddressX + ',' + activeAddressY;
 };
 
 mainPin.addEventListener('mouseup', function () {
@@ -267,6 +270,8 @@ var objectFinder = function (src) {
   for (var i = 0; i < AD_AMOUNT; i++) {
     if (src === ads[i].author.avatar) {
       drawBigAd(ads[i]);
+      modifyFeaturesList(ads[i].offer.features);
+      createImages(ads[i]);
     }
   }
 };
@@ -320,6 +325,7 @@ var makeRed = function () {
     }
   }
 };
+
 
 var popUpTemplate = document.querySelector('#success').content.querySelector('.success');
 
