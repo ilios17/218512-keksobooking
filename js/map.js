@@ -18,15 +18,7 @@ var MIN_ROOMS = 1;
 var MAX_ROOMS = 5;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
-var MAIN_PIN_WIDTH = 62;
-var MAIN_PIN_HEIGHT = 84;
-var MAIN_PIN_TOP = 375;
-var MAIN_PIN_LEFT = 570;
-var startAddressX = MAIN_PIN_WIDTH / 2 + MAIN_PIN_LEFT;
-var startAddressY = MAIN_PIN_WIDTH / 2 + MAIN_PIN_TOP;
-var activeAddressY = MAIN_PIN_HEIGHT + MAIN_PIN_TOP;
 var pinGap = PIN_WIDTH / 2;
-var offerArray = [];
 var avatarUrlArray = [];
 var avatarArray = [];
 var randomisedFeaturesArray = [];
@@ -37,10 +29,6 @@ var ads = [];
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var pinsList = document.querySelector('.map__pins');
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
-var priceInfo = document.querySelector('#price');
-var typeSelect = document.querySelector('#type');
-var timeInSelect = document.querySelector('#timein');
-var timeOutSelect = document.querySelector('#timeout');
 
 var shuffleArray = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
@@ -53,7 +41,8 @@ var shuffleArray = function (array) {
 };
 
 var randomizeInRange = function (min, max) {
-  var randomNumberInRange = Math.floor(Math.random() * ((max += 1) - min) + min);
+  var maxNumber = max + 1;
+  var randomNumberInRange = Math.floor(Math.random() * (maxNumber - min) + min);
   return randomNumberInRange;
 };
 
@@ -66,7 +55,7 @@ var createRandomPng = function (src) {
   return avatarUrlArray;
 };
 
-var avatarObjects = function (array) {
+var createAvatarObjects = function (array) {
   for (var i = 0; i < array.length; i++) {
     var avatar = {avatar: avatarUrlArray[i]};
     avatarArray.push(avatar);
@@ -92,7 +81,8 @@ var getRandomPhoto = function (array) {
   return randomisedPhotosArray;
 };
 
-var offerObjects = function () {
+var createOfferObjects = function () {
+  var offerArray = [];
   var randomTitle = shuffleArray(AD_TITLE_ARRAY);
   for (var i = 0; i < AD_AMOUNT; i++) {
     var offer = {price: randomizeInRange(MIN_PRICE, MAX_PRICE),
@@ -111,7 +101,7 @@ var offerObjects = function () {
   return offerArray;
 };
 
-var locationObjects = function () {
+var createLocationObjects = function () {
   for (var i = 0; i < AD_AMOUNT; i++) {
     var location = {x: randomizeInRange(MIN_X, MAX_X),
       y: randomizeInRange(MIN_Y, MAX_Y)};
@@ -123,9 +113,10 @@ var locationObjects = function () {
 
 
 var createAdArray = function () {
+  var returnedArray = createOfferObjects();
   for (var i = 0; i < AD_AMOUNT; i++) {
     var ad = {author: avatarArray[i],
-      offer: offerArray[i],
+      offer: returnedArray[i],
       location: locationsArray[i]};
 
     ads.push(ad);
@@ -140,7 +131,6 @@ var createPin = function (adInfo) {
   singlePin.querySelector('img').alt = adInfo.offer.title;
   return singlePin;
 };
-
 
 var drawPins = function () {
   var fragment = document.createDocumentFragment();
@@ -169,6 +159,41 @@ var typeTranslator = function (type) {
   return translatedType;
 };
 
+var modifyFeaturesList = function (features, parent) {
+  var clone = parent.cloneNode(true);
+  parent.innerHTML = '';
+  for (var i = 0; i < features.length; i++) {
+    if (features[i] === 'wifi') {
+      parent.appendChild(clone.querySelector('.popup__feature--wifi'));
+    }
+    if (features[i] === 'dishwasher') {
+      parent.appendChild(clone.querySelector('.popup__feature--dishwasher'));
+    }
+    if (features[i] === 'parking') {
+      parent.appendChild(clone.querySelector('.popup__feature--parking'));
+    }
+    if (features[i] === 'washer') {
+      parent.appendChild(clone.querySelector('.popup__feature--washer'));
+    }
+    if (features[i] === 'elevator') {
+      parent.appendChild(clone.querySelector('.popup__feature--elevator'));
+    }
+    if (features[i] === 'conditioner') {
+      parent.appendChild(clone.querySelector('.popup__feature--conditioner'));
+    }
+  }
+};
+
+var createImages = function (photos, parent) {
+  var fragment = document.createDocumentFragment();
+  for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
+    var clone = parent.cloneNode(true);
+    clone.querySelector('.popup__photo').src = photos[i];
+    fragment.appendChild(clone.querySelector('.popup__photo'));
+  }
+  parent.appendChild(fragment);
+};
+
 var showAd = function (ad) {
   var adCard = cardTemplate.cloneNode(true);
   adCard.querySelector('.popup__title').innerHTML = ad.offer.title;
@@ -180,44 +205,10 @@ var showAd = function (ad) {
   adCard.querySelector('.popup__photo').src = ad.offer.photos[0];
   adCard.querySelector('.popup__avatar').src = ad.author.avatar;
   adCard.querySelector('.popup__description').innerHTML = ad.offer.description;
+  modifyFeaturesList(ad.offer.features, adCard.querySelector('.popup__features'));
+  createImages(ad.offer.photos, adCard.querySelector('.popup__photos'));
 
   return adCard;
-};
-
-var modifyFeaturesList = function (features) {
-  var featuresUl = document.querySelector('.popup__features');
-  var clone = featuresUl.cloneNode(true);
-  featuresUl.innerHTML = '';
-  for (var i = 0; i < features.length; i++) {
-    if (features[i] === 'wifi') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--wifi'));
-    }
-    if (features[i] === 'dishwasher') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--dishwasher'));
-    }
-    if (features[i] === 'parking') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--parking'));
-    }
-    if (features[i] === 'washer') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--washer'));
-    }
-    if (features[i] === 'elevator') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--elevator'));
-    }
-    if (features[i] === 'conditioner') {
-      document.querySelector('.popup__features').appendChild(clone.querySelector('.popup__feature--conditioner'));
-    }
-  }
-};
-
-var createImages = function (adsElement) {
-  var fragment = document.createDocumentFragment();
-  for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
-    var photoElement = document.querySelector('.popup__photo').cloneNode(true);
-    photoElement.src = adsElement.offer.photos[i];
-    fragment.appendChild(photoElement);
-  }
-  document.querySelector('.popup__photos').appendChild(fragment);
 };
 
 var drawBigAd = function (adsElement) {
@@ -226,115 +217,11 @@ var drawBigAd = function (adsElement) {
 
 shuffleArray(AD_TITLE_ARRAY);
 createRandomPng(AVATAR_SRC);
-avatarObjects(avatarUrlArray);
+createAvatarObjects(avatarUrlArray);
 getRandomPhoto(PHOTOS_URL_ARRAY);
 getRandomFeature(HOUSE_FEATURES_ARRAY);
-locationObjects();
-offerObjects();
+createLocationObjects();
 createAdArray();
-
-var mainPin = document.querySelector('.map__pin--main');
-var pinsContainer = document.querySelector('.map__pins');
-var addressField = document.querySelector('#address');
-
-addressField.value = startAddressX + ',' + startAddressY;
-
-var removeDisables = function () {
-  var fieldsets = document.querySelectorAll('fieldset');
-  for (var i = 0; i < fieldsets.length; i++) {
-    fieldsets[i].removeAttribute('disabled');
-  }
-};
-
-var removeSelectDisables = function () {
-  var selects = document.querySelectorAll('select');
-  for (var i = 0; i < selects.length; i++) {
-    selects[i].removeAttribute('disabled');
-  }
-};
-
-var openMapAndForms = function () {
-  document.querySelector('.map').classList.remove('map--faded');
-  document.querySelector('.ad-form').classList.remove('ad-form--disabled');
-  addressField.value = startAddressX + ',' + activeAddressY;
-};
-
-mainPin.addEventListener('mouseup', function () {
-  openMapAndForms();
-  removeDisables();
-  removeSelectDisables();
-  drawPins();
-});
-
-var objectFinder = function (src) {
-  for (var i = 0; i < AD_AMOUNT; i++) {
-    if (src === ads[i].author.avatar) {
-      drawBigAd(ads[i]);
-      modifyFeaturesList(ads[i].offer.features);
-      createImages(ads[i]);
-    }
-  }
-};
-
-pinsContainer.onclick = function (evt) {
-  objectFinder(evt.target.getAttribute('src'));
-};
-
-var setMinPrice = function () {
-  if (typeSelect.options[1].selected) {
-    priceInfo.placeholder = '1000';
-    priceInfo.min = '1000';
-  }
-  if (typeSelect.options[0].selected) {
-    priceInfo.placeholder = '0';
-    priceInfo.min = '0';
-  }
-  if (typeSelect.options[2].selected) {
-    priceInfo.placeholder = '5000';
-    priceInfo.min = '5000';
-  }
-  if (typeSelect.options[3].selected) {
-    priceInfo.placeholder = '10000';
-    priceInfo.min = '10000';
-  }
-};
-
-setMinPrice();
-
-typeSelect.addEventListener('change', function () {
-  setMinPrice();
-});
-
-var changeTime = function (index, element) {
-  element.options[index].selected = 'selected';
-};
-
-timeInSelect.onchange = function (evt) {
-  changeTime(evt.target.selectedIndex, timeOutSelect);
-};
-
-timeOutSelect.onchange = function (evt) {
-  changeTime(evt.target.selectedIndex, timeInSelect);
-};
-
-var makeRed = function () {
-  var inputs = document.querySelectorAll('input');
-  for (var i = 0; i < inputs.length; i++) {
-    if (inputs[i].checkValidity === false) {
-      inputs[i].style.boxShadow = '0 0 10px red';
-    }
-  }
-};
-
-
-var popUpTemplate = document.querySelector('#success').content.querySelector('.success');
-
-var showPopUp = function () {
-  var popUp = popUpTemplate.cloneNode(true);
-  document.querySelector('main').insertAdjacentElement('beforeend', popUp);
-};
-
-document.querySelector('.ad-form').onsubmit = function () {
-  makeRed();
-  showPopUp();
-};
+drawBigAd(ads[0]);
+drawPins();
+document.querySelector('.map').classList.remove('map--faded');
