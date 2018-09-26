@@ -26,7 +26,6 @@ var pinGap = PIN_WIDTH / 2;
 var addressStartX = MAIN_PIN_WIDTH / 2 + pinPositionLeft;
 var addressStartY = MAIN_PIN_WIDTH / 2 + pinPositionTop;
 var addressActiveY = MAIN_PIN_HEIGHT + pinPositionTop;
-var offerArray = [];
 var avatarUrlArray = [];
 var avatarArray = [];
 var randomisedFeaturesArray = [];
@@ -53,7 +52,8 @@ var shuffleArray = function (array) {
 };
 
 var randomizeInRange = function (min, max) {
-  var randomNumberInRange = Math.floor(Math.random() * ((max += 1) - min) + min);
+  var maxNumber = max + 1;
+  var randomNumberInRange = Math.floor(Math.random() * (maxNumber - min) + min);
   return randomNumberInRange;
 };
 
@@ -66,7 +66,7 @@ var createRandomPng = function (src) {
   return avatarUrlArray;
 };
 
-var avatarObjects = function (array) {
+var createAvatarObjects = function (array) {
   for (var i = 0; i < array.length; i++) {
     var avatar = {avatar: avatarUrlArray[i]};
     avatarArray.push(avatar);
@@ -92,7 +92,8 @@ var getRandomPhoto = function (array) {
   return randomisedPhotosArray;
 };
 
-var offerObjects = function () {
+var createOfferObjects = function () {
+  var offerArray = [];
   var randomTitle = shuffleArray(AD_TITLE_ARRAY);
   for (var i = 0; i < AD_AMOUNT; i++) {
     var offer = {price: randomizeInRange(MIN_PRICE, MAX_PRICE),
@@ -111,7 +112,7 @@ var offerObjects = function () {
   return offerArray;
 };
 
-var locationObjects = function () {
+var createLocationObjects = function () {
   for (var i = 0; i < AD_AMOUNT; i++) {
     var location = {x: randomizeInRange(MIN_X, MAX_X),
       y: randomizeInRange(MIN_Y, MAX_Y)};
@@ -123,9 +124,10 @@ var locationObjects = function () {
 
 
 var createAdArray = function () {
+  var returnedArray = createOfferObjects();
   for (var i = 0; i < AD_AMOUNT; i++) {
     var ad = {author: avatarArray[i],
-      offer: offerArray[i],
+      offer: returnedArray[i],
       location: locationsArray[i]};
 
     ads.push(ad);
@@ -168,6 +170,41 @@ var typeTranslator = function (type) {
   return translatedType;
 };
 
+var modifyFeaturesList = function (features, parent) {
+  var clone = parent.cloneNode(true);
+  parent.innerHTML = '';
+  for (var i = 0; i < features.length; i++) {
+    if (features[i] === 'wifi') {
+      parent.appendChild(clone.querySelector('.popup__feature--wifi'));
+    }
+    if (features[i] === 'dishwasher') {
+      parent.appendChild(clone.querySelector('.popup__feature--dishwasher'));
+    }
+    if (features[i] === 'parking') {
+      parent.appendChild(clone.querySelector('.popup__feature--parking'));
+    }
+    if (features[i] === 'washer') {
+      parent.appendChild(clone.querySelector('.popup__feature--washer'));
+    }
+    if (features[i] === 'elevator') {
+      parent.appendChild(clone.querySelector('.popup__feature--elevator'));
+    }
+    if (features[i] === 'conditioner') {
+      parent.appendChild(clone.querySelector('.popup__feature--conditioner'));
+    }
+  }
+};
+
+var createImages = function (photos, parent) {
+  var fragment = document.createDocumentFragment();
+  for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
+    var clone = parent.cloneNode(true);
+    clone.querySelector('.popup__photo').src = photos[i];
+    fragment.appendChild(clone.querySelector('.popup__photo'));
+  }
+  parent.appendChild(fragment);
+};
+
 var showAd = function (ad) {
   var adCard = cardTemplate.cloneNode(true);
   adCard.querySelector('.popup__title').innerHTML = ad.offer.title;
@@ -179,66 +216,22 @@ var showAd = function (ad) {
   adCard.querySelector('.popup__photo').src = ad.offer.photos[0];
   adCard.querySelector('.popup__avatar').src = ad.author.avatar;
   adCard.querySelector('.popup__description').innerHTML = ad.offer.description;
+  modifyFeaturesList(ad.offer.features, adCard.querySelector('.popup__features'));
+  createImages(ad.offer.photos, adCard.querySelector('.popup__photos'));
 
   return adCard;
 };
 
-var hideSameElements = function (array) {
-  for (var i = 1; i < array.length; i++) {
-    array[i].style.display = 'none';
-  }
-};
-
-
-var modifyFeaturesList = function (features) {
-  for (var i = 0; i < features.length; i++) {
-    if (features[i] === 'wifi') {
-      document.querySelector('.popup__feature--wifi').style.display = 'inline-block';
-    }
-    if (features[i] === 'dishwasher') {
-      document.querySelector('.popup__feature--dishwasher').style.display = 'inline-block';
-    }
-    if (features[i] === 'parking') {
-      document.querySelector('.popup__feature--parking').style.display = 'inline-block';
-    }
-    if (features[i] === 'washer') {
-      document.querySelector('.popup__feature--washer').style.display = 'inline-block';
-    }
-    if (features[i] === 'elevator') {
-      document.querySelector('.popup__feature--elevator').style.display = 'inline-block';
-    }
-    if (features[i] === 'conditioner') {
-      document.querySelector('.popup__feature--conditioner').style.display = 'inline-block';
-    }
-  }
-};
-
-var createImages = function (adsElement) {
-  var photoElement = document.querySelector('.popup__photo').cloneNode(true);
-  var fragment = document.createDocumentFragment();
-  for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
-    fragment.appendChild(photoElement);
-    document.querySelector('.popup__photo').src = adsElement.offer.photos[i];
-  }
-  document.querySelector('.popup__photos').appendChild(fragment);
-};
-
 var drawBigAd = function (adsElement) {
   document.querySelector('.map__filters-container').insertAdjacentElement('beforeBegin', showAd(adsElement));
-  var featuresListItems = document.querySelectorAll('.popup__feature');
-  hideSameElements(featuresListItems);
-  modifyFeaturesList(adsElement.offer.features);
-  createImages(adsElement);
 };
-
 
 shuffleArray(AD_TITLE_ARRAY);
 createRandomPng(AVATAR_SRC);
-avatarObjects(avatarUrlArray);
+createAvatarObjects(avatarUrlArray);
 getRandomPhoto(PHOTOS_URL_ARRAY);
 getRandomFeature(HOUSE_FEATURES_ARRAY);
-locationObjects();
-offerObjects();
+createLocationObjects();
 createAdArray();
 
 var mainPin = document.querySelector('.map__pin--main');
@@ -281,26 +274,17 @@ var objectFinder = function (src) {
   }
 };
 
-pinsContainer.onclick = function (evt) {
+pinsContainer.addEventListener('click', function (evt) {
   objectFinder(evt.target.getAttribute('src'));
-};
+});
 
 var setMinPrice = function () {
-  if (typeSelect.options[1].selected) {
-    priceInfo.placeholder = '1000';
-    priceInfo.min = '1000';
-  }
-  if (typeSelect.options[0].selected) {
-    priceInfo.placeholder = '0';
-    priceInfo.min = '0';
-  }
-  if (typeSelect.options[2].selected) {
-    priceInfo.placeholder = '5000';
-    priceInfo.min = '5000';
-  }
-  if (typeSelect.options[3].selected) {
-    priceInfo.placeholder = '10000';
-    priceInfo.min = '10000';
+  var prices = [0, 1000, 5000, 10000];
+  for (var i = 0; i < prices.length; i++) {
+    if (typeSelect.options[i].selected) {
+      priceInfo.placeholder = String(prices[i]);
+      priceInfo.min = String(prices[i]);
+    }
   }
 };
 
@@ -314,36 +298,11 @@ var changeTime = function (index, element) {
   element.options[index].selected = 'selected';
 };
 
-timeInSelect.onchange = function (evt) {
+timeInSelect.addEventListener('change', function (evt) {
   changeTime(evt.target.selectedIndex, timeOutSelect);
-};
-
-timeOutSelect.onchange = function (evt) {
-  changeTime(evt.target.selectedIndex, timeInSelect);
-};
-
-var popUpTemplate = document.querySelector('#success').content.querySelector('.success');
-
-var showPopUp = function () {
-  var popUp = popUpTemplate.cloneNode(true);
-  document.querySelector('main').insertAdjacentElement('beforeend', popUp);
-};
-
-var closePopUp = function () {
-  document.querySelector('main').removeChild(document.querySelector('.success'));
-};
-
-var makeRed = function () {
-  var inputs = document.querySelectorAll('input');
-  showPopUp();
-  for (var i = 0; i < inputs.length; i++) {
-    if (inputs[i].validity.valid === false) {
-      closePopUp();
-      inputs[i].style.boxShadow = '0 0 1px 5px red';
-    }
-  }
-};
-
-document.querySelector('.ad-form__submit').addEventListener('click', function () {
-  makeRed();
 });
+
+timeOutSelect.addEventListener('change', function (evt) {
+  changeTime(evt.target.selectedIndex, timeInSelect);
+});
+
