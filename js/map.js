@@ -20,6 +20,8 @@ var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var MAIN_PIN_WIDTH = 62;
 var MAIN_PIN_HEIGHT = 84;
+var ESK_KEYCODE = 27;
+var PRICES = ['0', '1000', '5000', '10000'];
 var pinPositionLeft = 570;
 var pinPositionTop = 375;
 var pinGap = PIN_WIDTH / 2;
@@ -222,6 +224,7 @@ var showAd = function (ad) {
   return adCard;
 };
 
+
 var drawBigAd = function (adsElement) {
   document.querySelector('.map__filters-container').insertAdjacentElement('beforeBegin', showAd(adsElement));
 };
@@ -274,16 +277,33 @@ var objectFinder = function (src) {
   }
 };
 
+var closeAd = function () {
+  document.querySelector('.map').removeChild(document.querySelector('.map__card'));
+};
+
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === ESK_KEYCODE) {
+    closeAd();
+  }
+};
+
 pinsContainer.addEventListener('click', function (evt) {
   objectFinder(evt.target.getAttribute('src'));
+  document.addEventListener('keydown', onPopupEscPress);
+});
+
+document.addEventListener('click', function (evt) {
+  if (evt.target.className === 'popup__close') {
+    closeAd();
+    document.removeEventListener('keydown', onPopupEscPress);
+  }
 });
 
 var setMinPrice = function () {
-  var prices = [0, 1000, 5000, 10000];
-  for (var i = 0; i < prices.length; i++) {
+  for (var i = 0; i < PRICES.length; i++) {
     if (typeSelect.options[i].selected) {
-      priceInfo.placeholder = String(prices[i]);
-      priceInfo.min = String(prices[i]);
+      priceInfo.placeholder = PRICES[i];
+      priceInfo.min = PRICES[i];
     }
   }
 };
@@ -305,4 +325,3 @@ timeInSelect.addEventListener('change', function (evt) {
 timeOutSelect.addEventListener('change', function (evt) {
   changeTime(evt.target.selectedIndex, timeInSelect);
 });
-
