@@ -4,7 +4,7 @@
   var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 
 
-  const typeTranslator = {
+  var typeTranslator = {
     flat: 'Квартира',
     bungalo: 'Бунгало',
     house: 'Дом',
@@ -17,27 +17,13 @@
 
 
   var modifyFeaturesList = function (features, parent) {
-    var clone = parent.cloneNode(true);
     parent.innerHTML = '';
     for (var i = 0; i < features.length; i++) {
-      if (features[i] === 'wifi') {
-        parent.appendChild(clone.querySelector('.popup__feature--wifi'));
-      }
-      if (features[i] === 'dishwasher') {
-        parent.appendChild(clone.querySelector('.popup__feature--dishwasher'));
-      }
-      if (features[i] === 'parking') {
-        parent.appendChild(clone.querySelector('.popup__feature--parking'));
-      }
-      if (features[i] === 'washer') {
-        parent.appendChild(clone.querySelector('.popup__feature--washer'));
-      }
-      if (features[i] === 'elevator') {
-        parent.appendChild(clone.querySelector('.popup__feature--elevator'));
-      }
-      if (features[i] === 'conditioner') {
-        parent.appendChild(clone.querySelector('.popup__feature--conditioner'));
-      }
+      var featureName = features[i];
+      var feature = document.createElement('li');
+      feature.classList.add('popup__feature');
+      feature.classList.add('popup__feature--' + featureName);
+      parent.appendChild(feature);
     }
   };
 
