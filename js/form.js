@@ -2,6 +2,7 @@
 
 
 (function () {
+  var PRICES = ['0', '1000', '5000', '10000'];
   var priceInfo = document.querySelector('#price');
   var typeSelect = document.querySelector('#type');
   var timeInSelect = document.querySelector('#timein');
@@ -9,19 +10,17 @@
 
   var setMinPrice = function () {
 
-    for (var i = 0; i < window.data.PRICES.length; i++) {
+    for (var i = 0; i < PRICES.length; i++) {
       if (typeSelect.options[i].selected) {
-        priceInfo.placeholder = window.data.PRICES[i];
-        priceInfo.min = window.data.PRICES[i];
+        priceInfo.placeholder = PRICES[i];
+        priceInfo.min = PRICES[i];
       }
     }
   };
 
   setMinPrice();
 
-  typeSelect.addEventListener('change', function () {
-    setMinPrice();
-  });
+  typeSelect.addEventListener('change', setMinPrice);
 
   var changeTime = function (index, element) {
     element.options[index].selected = 'selected';
@@ -50,6 +49,7 @@
       roomsSelect.setCustomValidity('Такое количество комнат не подходит для гостей');
     } else {
       roomsSelect.setCustomValidity('');
+      roomsSelect.style.boxShadow = 'none';
     }
   };
 
@@ -59,13 +59,79 @@
     for (var i = 0; i < inputs.length; i++) {
       if (!inputs[i].validity.valid) {
         inputs[i].style.boxShadow = '0 0 1px 5px red';
+      } else {
+        inputs[i].style.boxShadow = 'none';
       }
     }
   };
 
+  var main = document.querySelector('main');
+
+
+  var onPopupEscPress = function (evt) {
+    if (evt.keyCode === window.utilities.ESK_KEYCODE) {
+      closePopUp();
+    }
+  };
+
+  var closePopUp = function () {
+    main.removeChild(document.querySelector('.success'));
+    document.removeEventListener('click', closePopUp);
+    document.removeEventListener('keydown', onPopupEscPress);
+  };
+
+  var closeErrorPopUp = function () {
+    main.removeChild(document.querySelector('.error'));
+    document.removeEventListener('click', closeErrorPopUp);
+    document.removeEventListener('keydown', onErrorEskPress);
+    document.removeEventListener('keydown', onErrorEskPress);
+  };
+
+  var onErrorEskPress = function (evt) {
+    if (evt.keyCode === window.utilities.ESK_KEYCODE) {
+      closeErrorPopUp();
+    }
+  };
+
+  var onErrorEnterPress = function (evt) {
+    if (evt.keyCode === window.utilities.ENTER_KEYCODE) {
+      closeErrorPopUp();
+    }
+  };
+
+  var form = document.querySelector('.ad-form');
+
+  var resetCompletely = function () {
+    form.reset();
+    window.map.closeMapAndForm();
+  };
+
+  document.querySelector('.ad-form__reset').addEventListener('click', resetCompletely);
+
   document.querySelector('.ad-form__submit').addEventListener('click', function () {
     makeInvalidRed();
     setCustomRoomsValidity();
+  });
+
+  var openFormPopUp = function (template, onEsk, closeThisPopUp) {
+    main.insertAdjacentElement('beforeend', template.cloneNode(true));
+    document.addEventListener('keydown', onEsk);
+    document.addEventListener('click', closeThisPopUp);
+  };
+
+  var succeSSHandler = function () {
+    openFormPopUp(document.querySelector('#success').content.querySelector('.success'), onPopupEscPress, closePopUp);
+    resetCompletely();
+  };
+
+  var errorHandler = function () {
+    openFormPopUp(document.querySelector('#error').content.querySelector('.error'), onErrorEskPress, closeErrorPopUp);
+    document.querySelector('.error__button').addEventListener('keydown', onErrorEnterPress);
+  };
+
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.upload(new FormData(form), succeSSHandler, errorHandler);
   });
 
 })();
