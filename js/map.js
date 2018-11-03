@@ -86,6 +86,7 @@ var getRandomFeature = function (array) {
   return randomisedFeaturesArray;
 };
 
+
 var getRandomPhoto = function (array) {
   for (var i = 0; i < AD_AMOUNT; i++) {
     shuffleArray(array);
