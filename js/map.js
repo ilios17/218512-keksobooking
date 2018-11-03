@@ -25,6 +25,9 @@ var PRICES = ['0', '1000', '5000', '10000'];
 var pinPositionLeft = 570;
 var pinPositionTop = 375;
 var pinGap = PIN_WIDTH / 2;
+var addressStartX = MAIN_PIN_WIDTH / 2 + pinPositionLeft;
+var addressStartY = MAIN_PIN_WIDTH / 2 + pinPositionTop;
+var addressActiveY = MAIN_PIN_HEIGHT + pinPositionTop;
 var avatarUrlArray = [];
 var avatarArray = [];
 var randomisedFeaturesArray = [];
@@ -35,6 +38,10 @@ var ads = [];
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var pinsList = document.querySelector('.map__pins');
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
+var priceInfo = document.querySelector('#price');
+var typeSelect = document.querySelector('#type');
+var timeInSelect = document.querySelector('#timein');
+var timeOutSelect = document.querySelector('#timeout');
 
 var shuffleArray = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
@@ -69,7 +76,6 @@ var createAvatarObjects = function (array) {
   return avatarArray;
 };
 
-
 var getRandomFeature = function (array) {
   for (var i = 0; i < AD_AMOUNT; i++) {
     shuffleArray(array);
@@ -78,7 +84,6 @@ var getRandomFeature = function (array) {
   }
   return randomisedFeaturesArray;
 };
-
 
 var getRandomPhoto = function (array) {
   for (var i = 0; i < AD_AMOUNT; i++) {
@@ -148,6 +153,50 @@ var drawPins = function () {
   pinsList.appendChild(fragment);
 };
 
+var typeTranslator = function (type) {
+  var translatedType = '';
+  switch (type) {
+    case 'flat':
+      translatedType = 'Квартира';
+      break;
+    case 'bungalo':
+      translatedType = 'Бунгало';
+      break;
+    case 'house':
+      translatedType = 'Дом';
+      break;
+    case 'palace':
+      translatedType = 'Дворец';
+      break;
+  }
+  return translatedType;
+};
+
+var modifyFeaturesList = function (features, parent) {
+  var clone = parent.cloneNode(true);
+  parent.innerHTML = '';
+  for (var i = 0; i < features.length; i++) {
+    if (features[i] === 'wifi') {
+      parent.appendChild(clone.querySelector('.popup__feature--wifi'));
+    }
+    if (features[i] === 'dishwasher') {
+      parent.appendChild(clone.querySelector('.popup__feature--dishwasher'));
+    }
+    if (features[i] === 'parking') {
+      parent.appendChild(clone.querySelector('.popup__feature--parking'));
+    }
+    if (features[i] === 'washer') {
+      parent.appendChild(clone.querySelector('.popup__feature--washer'));
+    }
+    if (features[i] === 'elevator') {
+      parent.appendChild(clone.querySelector('.popup__feature--elevator'));
+    }
+    if (features[i] === 'conditioner') {
+      parent.appendChild(clone.querySelector('.popup__feature--conditioner'));
+    }
+  }
+};
+
 var createImages = function (photos, parent) {
   var fragment = document.createDocumentFragment();
   for (var i = 1; i < PHOTOS_URL_ARRAY.length; i++) {
@@ -155,6 +204,7 @@ var createImages = function (photos, parent) {
     clone.querySelector('.popup__photo').src = photos[i];
     fragment.appendChild(clone.querySelector('.popup__photo'));
   }
+  parent.appendChild(fragment);
 };
 
 var showAd = function (ad) {
@@ -162,7 +212,7 @@ var showAd = function (ad) {
   adCard.querySelector('.popup__title').innerHTML = ad.offer.title;
   adCard.querySelector('.popup__text--address').innerHTML = ad.offer.adress;
   adCard.querySelector('.popup__text--price').innerHTML = ad.offer.price + '₽/ночь';
-
+  adCard.querySelector('.popup__type').innerHTML = typeTranslator(ad.offer.type);
   adCard.querySelector('.popup__text--capacity').innerHTML = ad.offer.rooms + ' комнаты для ' + ad.offer.guests + ' гостей';
   adCard.querySelector('.popup__text--time').innerHTML = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
   adCard.querySelector('.popup__photo').src = ad.offer.photos[0];
@@ -173,6 +223,7 @@ var showAd = function (ad) {
 
   return adCard;
 };
+
 
 var drawBigAd = function (adsElement) {
   document.querySelector('.map__filters-container').insertAdjacentElement('beforeBegin', showAd(adsElement));
@@ -185,3 +236,92 @@ getRandomPhoto(PHOTOS_URL_ARRAY);
 getRandomFeature(HOUSE_FEATURES_ARRAY);
 createLocationObjects();
 createAdArray();
+
+var mainPin = document.querySelector('.map__pin--main');
+var pinsContainer = document.querySelector('.map__pins');
+document.querySelector('#address').value = addressStartX + ',' + addressStartY;
+
+var removeDisables = function () {
+  var fieldsets = document.querySelectorAll('fieldset');
+  for (var i = 0; i < fieldsets.length; i++) {
+    fieldsets[i].removeAttribute('disabled');
+  }
+};
+
+var removeSelectDisables = function () {
+  var selects = document.querySelectorAll('select');
+  for (var i = 0; i < selects.length; i++) {
+    selects[i].removeAttribute('disabled');
+  }
+};
+
+var openMapAndForms = function () {
+  document.querySelector('.map').classList.remove('map--faded');
+  document.querySelector('.ad-form').classList.remove('ad-form--disabled');
+  document.querySelector('#address').value = addressStartX + ',' + addressActiveY;
+
+};
+
+mainPin.addEventListener('mouseup', function () {
+  openMapAndForms();
+  removeDisables();
+  removeSelectDisables();
+  drawPins();
+});
+
+var objectFinder = function (src) {
+  for (var i = 0; i < AD_AMOUNT; i++) {
+    if (src === ads[i].author.avatar) {
+      drawBigAd(ads[i]);
+    }
+  }
+};
+
+var closeAd = function () {
+  document.querySelector('.map').removeChild(document.querySelector('.map__card'));
+};
+
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === ESK_KEYCODE) {
+    closeAd();
+  }
+};
+
+pinsContainer.addEventListener('click', function (evt) {
+  objectFinder(evt.target.getAttribute('src'));
+  document.addEventListener('keydown', onPopupEscPress);
+});
+
+document.addEventListener('click', function (evt) {
+  if (evt.target.className === 'popup__close') {
+    closeAd();
+    document.removeEventListener('keydown', onPopupEscPress);
+  }
+});
+
+var setMinPrice = function () {
+  for (var i = 0; i < PRICES.length; i++) {
+    if (typeSelect.options[i].selected) {
+      priceInfo.placeholder = PRICES[i];
+      priceInfo.min = PRICES[i];
+    }
+  }
+};
+
+setMinPrice();
+
+typeSelect.addEventListener('change', function () {
+  setMinPrice();
+});
+
+var changeTime = function (index, element) {
+  element.options[index].selected = 'selected';
+};
+
+timeInSelect.addEventListener('change', function (evt) {
+  changeTime(evt.target.selectedIndex, timeOutSelect);
+});
+
+timeOutSelect.addEventListener('change', function (evt) {
+  changeTime(evt.target.selectedIndex, timeInSelect);
+});
