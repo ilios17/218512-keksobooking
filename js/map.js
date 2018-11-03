@@ -76,6 +76,7 @@ var createAvatarObjects = function (array) {
   return avatarArray;
 };
 
+
 var getRandomFeature = function (array) {
   for (var i = 0; i < AD_AMOUNT; i++) {
     shuffleArray(array);
