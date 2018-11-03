@@ -3,6 +3,7 @@
 
 (function () {
   var PRICES = ['0', '1000', '5000', '10000'];
+  var ERROR_COLOR = '0 0 1px 5px red';
   var priceInfo = document.querySelector('#price');
   var typeSelect = document.querySelector('#type');
   var timeInSelect = document.querySelector('#timein');
@@ -38,7 +39,7 @@
   var guestsSelect = document.querySelector('#capacity');
 
   var setCustomRoomsValidity = function () {
-    roomsSelect.style.boxShadow = '0 0 1px 5px red';
+    roomsSelect.style.boxShadow = ERROR_COLOR;
     if (roomsSelect.options[0].selected && !guestsSelect.options[2].selected) {
       roomsSelect.setCustomValidity('Такое количество комнат подходит для 1 гостя');
     } else if (roomsSelect.options[2].selected && guestsSelect.options[3].selected) {
@@ -49,7 +50,7 @@
       roomsSelect.setCustomValidity('Такое количество комнат не подходит для гостей');
     } else {
       roomsSelect.setCustomValidity('');
-      roomsSelect.style.boxShadow = 'none';
+      roomsSelect.style.boxShadow = ERROR_COLOR;
     }
   };
 
@@ -58,7 +59,7 @@
 
     for (var i = 0; i < inputs.length; i++) {
       if (!inputs[i].validity.valid) {
-        inputs[i].style.boxShadow = '0 0 1px 5px red';
+        inputs[i].style.boxShadow = ERROR_COLOR;
       } else {
         inputs[i].style.boxShadow = 'none';
       }
