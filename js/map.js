@@ -164,7 +164,6 @@ var getTitle = function (type) {
   return typeTranslator[type];
 };
 
-
 var modifyFeaturesList = function (features, parent) {
   parent.innerHTML = '';
   for (var i = 0; i < features.length; i++) {
@@ -202,7 +201,6 @@ var showAd = function (ad) {
 
   return adCard;
 };
-
 
 var drawBigAd = function (adsElement) {
   document.querySelector('.map__filters-container').insertAdjacentElement('beforeBegin', showAd(adsElement));
